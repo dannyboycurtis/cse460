@@ -63,7 +63,7 @@ private:
     static const int MEM_SIZE = 256;
     vector < int > reg;
     vector < int > mem;
-    instruction binaryCode;
+    instruction finalcode;
     int pc, ir, sr, sp, base, limit, clock;
     map<int, FP> instr;
     string oFileName, inFileName, outFileName;

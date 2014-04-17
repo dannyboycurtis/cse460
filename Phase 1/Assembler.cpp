@@ -51,13 +51,13 @@ Assembler::Assembler()
 
 // assemble function
 // Convert assembly code to binary
-void Assembler::assemble( string filename )
+void Assembler::assemble( string fileName )
 {
-    string line, opcode;
+    string buffer, opcode;
 	
     // Set filenames for output and input files
-    inputFile = filename;
-    outputFile = filename.erase( filename.length() - 2, 2 ) + ".o";
+    inputFile = fileName;
+    outputFile = fileName.erase( fileName.length() - 2, 2 ) + ".o";
 
     fstream output;
     
@@ -115,10 +115,9 @@ void Assembler::assemble( string filename )
 } // end assemble function
 
 
-
 // write function
 // Write binary source code to file
-void Assembler::write( int sourceCode )
+void Assembler::write( int binaryCode )
 {
     fstream outFile;
 
@@ -129,67 +128,62 @@ void Assembler::write( int sourceCode )
     if ( !outFile.is_open() )
 	{
         cout << "Failed to open " << outputFile << endl;
-        exit(1);
+        exit( 1 );
     }
 
 	// write instruction code
-    outFile << sourceCode << endl;
+    outFile << binaryCode << endl;
 
     outFile.close();
 } // end write function
 
 
-
-// checkRD function
+// validateRD function
 // Confirm RD value is within range
-void Assembler::checkRD( int RD )
+void Assembler::validateRD( int RD )
 {
     if ( RD > 3 || RD < 0 )
 	{
         cout << "Invalid RD value" << endl;
         exit( 1 );
     }
-} // end checkRD
+} // end validateRD
 
 
-
-// checkRS function
+// validateRS function
 // Confirm RS value is within range
-void Assembler::checkRS( int RS )
+void Assembler::validateRS( int RS )
 {
     if ( RS > 3 || RS < 0 )
 	{
         cout << "Invalid RS value" << endl;
-        exit (1 );
+        exit ( 1 );
     }
-} // end checkRS
+} // end validateRS
 
 
-
-// checkADDR function
+// validateADDR function
 // Confirm ADDR value is within range
-void Assembler::checkADDR( int ADDR )
+void Assembler::validateADDR( int ADDR )
 {  
     if ( ADDR > 255 || ADDR < 0 )
 	{
         cout << "Invalid ADDR value" << endl;
         exit( 1 );
     }
-} // end checkADDR
+} // end validateADDR
 
 
-
-// checkCONST function
+// validateCONST function
 // Confirms CONST value is within range
-void Assembler::checkCONST( int CONST )
+void Assembler::validateCONST( int CONST )
 {
     if ( CONST > 127 || CONST < -128 )
 	{
         cout << "Invalid CONST value" << endl;
         exit( 1 );
     }
-}// end checkCONST
-
+}// end validateCONST
 
 
 // load function
@@ -204,24 +198,17 @@ void Assembler::load( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> ADDR;
     
-	// Confirm RD is valid
-    checkRD( RD );
-
-	// Confirm ADDR is valid
-    checkADDR( ADDR );
+	// Confirm RD and ADDR are valid
+    validateRD( RD );
+    validateADDR( ADDR );
  
-	// Insert OPCODE 00000
-    int num = 0;
+	// Insert OPCODE, RD and ADDR
+    int binary = 0; // 00000
+    binary += RD << 9;
+    binary += ADDR;
 
-	// Insert RD
-    num += RD << 9;
-
-	// Insert ADDR
-    num += ADDR;
-
-    write( num );
+    write( binary );
 } // end load function
-
 
 
 // loadi function
@@ -236,31 +223,23 @@ void Assembler::loadi( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> CONST;
 
-	// Confirm RD is valid
-    checkRD( RD );
-
-	// Confirm CONST is valid
-    checkCONST( CONST );
+	// Confirm RD and CONST are valid
+    validateRD( RD );
+    validateCONST( CONST );
     
-	// Insert OPCODE 00000
-    int num = 0;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
+	// Insert OPCODE, RD, I and CONST
+    int binary = 0; // 00000
+    binary += RD << 9;
+    binary += I << 8;
 
 	// If CONST is negative, take 2's complement
     if ( CONST < 0 )
         CONST = CONST & 0x00FF;
-    
-	// Insert CONST
-    num += CONST;
 
-    write( num );
+    binary += CONST;
+
+    write( binary );
 } // end loadi function
-
 
 
 // store function
@@ -275,25 +254,18 @@ void Assembler::store( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> ADDR;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and ADDR are valid
+    validateRD( RD );
+    validateADDR( ADDR );
 
-	// Confirm ADDR is valid
-    checkADDR( ADDR );
+	// Insert OPCODE, RD and ADDR
+    int binary = 1; // 00001
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += ADDR;
 
-	// Insert OPCODE 00001
-    int num = 1;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert ADDR
-    num += ADDR;
-
-    write( num );
+    write( binary );
 } // end store function
-
 
 
 // add function
@@ -308,28 +280,19 @@ void Assembler::add( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> RS;
 
-	// Confirm RD is valid
-    checkRD(RD);
-
-	// Confirm RS is valid
-    checkRS(RS);
+	// Confirm RD and RS are valid
+    validateRD(RD);
+    validateRS(RS);
     
-	// Insert OPCODE 00010
-    int num = 2;
-    num = num << 11;
+	// Insert OPCODE, RD, I and RS
+    int binary = 2; // 00010
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
+    binary += RS << 6;
 
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// Insert RS
-    num += RS << 6;
-
-    write(num);
+    write( binary );
 } // end add function
-
 
 
 // addi function
@@ -344,32 +307,23 @@ void Assembler::addi( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> CONST;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and CONST are valid
+    validateRD( RD );
+    validateCONST( CONST );
 
-	// Confirm CONST is valid
-    checkCONST( CONST );
+	// Insert OPCODE, RD, I and CONST
+    int binary = 2; // 00010
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
 
-	// Insert OPCODE 00010
-    int num = 2;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-    
-	// If CONST is negative, take 2's complement	
     if (CONST < 0)
         CONST = CONST & 0x00FF;
 
-	// Insert CONST
-    num += CONST;
+    binary += CONST;
 
-    write( num );
+    write( binary );
 } // end addi function
-
 
 
 // addc function
@@ -384,28 +338,19 @@ void Assembler::addc( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> RS;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and RS are valid
+    validateRD( RD );
+    validateRS( RS );
 
-	// Confirm RS is valid
-    checkRS( RS );
+	// Insert OPCODE, RD, I and RS
+    int binary = 3; // 00011
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
+    binary += RS << 6;
 
-	// Insert OPCODE 00011
-    int num = 3;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// Insert RS
-    num += RS << 6;
-
-    write( num );
+    write( binary );
 } // end addc function
-
 
 
 // addci function
@@ -420,32 +365,23 @@ void Assembler::addci( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> CONST;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and CONST are valid
+    validateRD( RD );
+    validateCONST( CONST );
 
-	// Confirm CONST is valid
-    checkCONST( CONST );
+	// Insert OPCODE, RD, I and CONST
+    int binary = 3; // 00011
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
 
-	// Insert OPCODE 00011
-    int num = 3;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// If CONST is negative, take 2's complement
     if ( CONST < 0 )
         CONST = CONST & 0x00FF;
 
-	// Insert CONST
-    num += CONST;
+    binary += CONST;
 
-    write( num );
+    write( binary );
 } // end addci function
-
 
 
 // sub function
@@ -460,28 +396,19 @@ void Assembler::sub( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> RS;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and RS are valid
+    validateRD( RD );
+    validateRS( RS );
 
-	// Confirm RS is valid
-    checkRS( RS );
+	// Insert OPCODE, RD, I and RS
+    int binary = 4; // 00100
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
+    binary += RS << 6;
 
-	// Insert OPCODE 00100
-    int num = 4;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// Insert RS
-    num += RS << 6;
-
-    write( num );
+    write( binary );
 } // end sub function
-
 
 
 // subi function
@@ -496,32 +423,23 @@ void Assembler::subi( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> CONST;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and CONST are valid
+    validateRD( RD );
+    validateCONST( CONST );
 
-	// Confirm CONST is valid
-    checkCONST( CONST );
+	// Insert OPCODE, RD, I and CONST
+    int binary = 4; // 00100
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
 
-	// Insert OPCODE 00100
-    int num = 4;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// If CONST is negative, take 2's complement
     if ( CONST < 0 )
         CONST = CONST & 0x00FF;
 
-	// Insert CONST
-    num += CONST;
+    binary += CONST;
 
-    write( num );
+    write( binary );
 } // end subi function
-
 
 
 // subc function
@@ -536,28 +454,19 @@ void Assembler::subc( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> RS;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and RS are valid
+    validateRD( RD );
+    validateRS( RS );
 
-	// Confirm RS is valid
-    checkRS( RS );
+	// Insert OPCODE, RD, I and RS
+    int binary = 5; // 00101
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
+    binary += RS << 6;
 
-	// Insert OPCODE 00101
-    int num = 5;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// Insert RS
-    num += RS << 6;
-
-    write( num );
+    write( binary );
 } // end subc function
-
 
 
 // subci function
@@ -572,32 +481,23 @@ void Assembler::subci( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> CONST;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and CONST are valid
+    validateRD( RD );
+    validateCONST( CONST );
 
-	// Confirm CONST is valid
-    checkCONST( CONST );
+	// Insert OPCODE, RD, I and CONST
+    int binary = 5; // 00101
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
 
-	// Insert OPCODE 00101
-    int num = 5;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// If CONST is negative, take 2's complement
     if ( CONST < 0 )
         CONST = CONST & 0x00FF;
 
-	// Insert CONST
-    num += CONST;
+    binary += CONST;
 
-    write( num );
+    write( binary );
 } // end subci function
-
 
 
 // _and function
@@ -612,28 +512,19 @@ void Assembler::_and( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> RS;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and RS are valid
+    validateRD( RD );
+    validateRS( RS );
 
-	// Confirm RS is valid
-    checkRS( RS );
+	// Insert OPCODE, RD, I and RS
+    int binary = 6; // 00110
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
+    binary += RS << 6;
 
-	// Insert OPCODE 00110
-    int num = 6;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// Insert RS
-    num += RS << 6;
-
-    write( num );
+    write( binary );
 } // end _and function
-
 
 
 // andi function
@@ -648,32 +539,23 @@ void Assembler::andi( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> CONST;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and CONST are valid
+    validateRD( RD );
+    validateCONST( CONST );
 
-	// Confirm CONST is valid
-    checkCONST( CONST );
+	// Insert OPCODE, RD, I and CONST
+    int binary = 6; // 00110
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
 
-	// Insert OPCODE 00110
-    int num = 6;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// If CONST is negative, take 2's complement
     if ( CONST < 0 )
         CONST = CONST & 0x00FF;
 
-	// Insert CONST
-    num += CONST;
+    binary += CONST;
 
-    write( num );
+    write( binary );
 } // end andi function
-
 
 
 // _xor function
@@ -688,28 +570,19 @@ void Assembler::_xor( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> RS;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and RS are valid
+    validateRD( RD );
+    validateRS( RS );
 
-	// Confirm RS is valid
-    checkRS( RS );
+	// Insert OPCODE, RD, i and RS
+    int binary = 7; // 00111
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
+    binary += RS << 6;
 
-	// Insert OPCODE 00111
-    int num = 7;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// Insert RS
-    num += RS << 6;
-
-    write( num );
+    write( binary );
 } // end _xor function
-
 
 
 // xori function
@@ -724,32 +597,23 @@ void Assembler::xori( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> CONST;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and CONST are valid
+    validateRD( RD );
+    validateCONST( CONST );
 
-	// Confirm CONST is valid
-    checkCONST( CONST );
+	// Insert OPCODE, RD, I and CONST
+    int binary = 7; // 00111
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
 
-	// Insert OPCODE 00111
-    int num = 7;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// If CONST is negative, take 2's complement
     if ( CONST < 0 )
         CONST = CONST & 0x00FF;
 
-	// Insert CONST
-    num += CONST;
+    binary += CONST;
 
-    write( num );
+    write( binary );
 } // end xori function
-
 
 
 // _compl function
@@ -765,18 +629,15 @@ void Assembler::_compl( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 01000
-    int num = 8;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 8; // 01000
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end _compl function
-
 
 
 // shl function
@@ -792,18 +653,15 @@ void Assembler::shl( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 01001
-    int num = 9;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 9; // 01001
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end shl function
-
 
 
 // shla function
@@ -819,18 +677,15 @@ void Assembler::shla( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 01010
-    int num = 10;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 10; // 01010
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end shal function
-
 
 
 // shr function
@@ -846,18 +701,15 @@ void Assembler::shr( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 01011
-    int num = 11;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 11; // 01011
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end shr function
-
 
 
 // shra function
@@ -873,18 +725,15 @@ void Assembler::shra( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 01100
-    int num = 12;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 12; // 01100
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end shra function
-
 
 
 // compr function
@@ -899,25 +748,18 @@ void Assembler::compr( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> RS;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and RD are valid
+    validateRD( RD );
+    validateRS( RS );
 
-	// Confirm RS is valid
-    checkRS( RS );
+	// Insert OPCODE, RD and RS
+    int binary = 13; // 01101
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += RS << 6;
 
-	// Insert OPCODE 01101
-    int num = 13;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert RS
-    num += RS << 6;
-
-    write( num );
+    write( binary );
 } // end compr function
-
 
 
 // compri function
@@ -932,32 +774,23 @@ void Assembler::compri( string s )
 	// Read in instruction
     iStream >> OPCODE >> RD >> CONST;
 
-	// Confirm RD is valid
-    checkRD( RD );
+	// Confirm RD and CONST are valid
+    validateRD( RD );
+    validateCONST( CONST );
 
-	// Confirm CONST is valid
-    checkCONST( CONST );
+	// Insert OPCODE, RD, I and CONST
+    int binary = 13; // 01101
+    binary = binary << 11;
+    binary += RD << 9;
+    binary += I << 8;
 
-	// Insert OPCODE 01101
-    int num = 13;
-    num = num << 11;
-
-	// Insert RD
-    num += RD << 9;
-
-	// Insert I
-    num += I << 8;
-
-	// If CONST is negative, take 2's complement
     if ( CONST < 0 )
         CONST = CONST & 0x00FF;
 
-	// Insert CONST
-    num += CONST;
+    binary += CONST;
 
-    write( num );
+    write( binary );
 } // end compri function
-
 
 
 // getstat function
@@ -973,18 +806,15 @@ void Assembler::getstat( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 01110
-    int num = 14;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 14; // 01110
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end getstat function
-
 
 
 // putstat function
@@ -1000,18 +830,15 @@ void Assembler::putstat( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 01111
-    int num = 15;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 15; // 01111
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end putstat function
-
 
 
 // jump function
@@ -1027,18 +854,15 @@ void Assembler::jump( string s )
     iStream >> OPCODE >> ADDR;
 
 	// Confirm ADDR is valid
-    checkADDR( ADDR );
+    validateADDR( ADDR );
 
-	// Insert OPCODE 10000
-    int num = 16;
-    num = num << 11;
+	// Insert OPCODE and ADDR
+    int binary = 16; // 10000
+    binary = binary << 11;
+    binary += ADDR;
 
-	// Insert ADDR
-    num += ADDR;
-
-    write( num );
+    write( binary );
 } // end jump function
-
 
 
 // jumpl function
@@ -1054,18 +878,15 @@ void Assembler::jumpl( string s )
     iStream >> OPCODE >> ADDR;
 
 	// Confirm ADDR is valid
-    checkADDR( ADDR );
+    validateADDR( ADDR );
 
-	// Insert OPCODE 10001
-    int num = 17;
-    num = num << 11;
+	// Insert OPCODE and ADDR
+    int binary = 17; // 10001
+    binary = binary << 11;
+    binary += ADDR;
 
-	// Insert ADDR
-    num += ADDR;
-
-    write( num );
+    write( binary );
 } // end jumpl function
-
 
 
 // jumpe function
@@ -1081,18 +902,15 @@ void Assembler::jumpe( string s )
     iStream >> OPCODE >> ADDR;
 
 	// Confirm ADDR is valid
-    checkADDR( ADDR );
+    validateADDR( ADDR );
 
-	// Insert OPCODE 10010
-    int num = 18;
-    num = num << 11;
+	// Insert OPCODE and ADDR
+    int binary = 18; // 10010
+    binary = binary << 11;
+    binary += ADDR;
 
-	// Insert ADDR
-    num += ADDR;
-
-    write( num );
+    write( binary );
 } // end jumpe function
-
 
 
 // jumpg function
@@ -1108,18 +926,15 @@ void Assembler::jumpg( string s )
     iStream >> OPCODE >> ADDR;
 
 	// Confirm ADDR is valid
-    checkADDR( ADDR );
+    validateADDR( ADDR );
 
-	// Insert OPCODE 10011
-    int num = 19;
-    num = num << 11;
+	// Insert OPCODE and ADDR
+    int binary = 19; // 10011
+    binary = binary << 11;
+    binary += ADDR;
 
-	// Insert ADDR
-    num += ADDR;
-
-    write( num );
+    write( binary );
 } // end jumpg function
-
 
 
 // call function
@@ -1135,31 +950,27 @@ void Assembler::call( string s )
     iStream >> OPCODE >> ADDR;
 
 	// Confirm ADDR is valid
-    checkADDR( ADDR );
+    validateADDR( ADDR );
 
-	// Insert OPCODE 10100
-    int num = 20;
-    num = num << 11;
+	// Insert OPCODE and ADDR
+    int binary = 20; // 10100
+    binary = binary << 11;
+    binary += ADDR;
 
-	// Insert ADDR
-    num += ADDR;
-
-    write( num );
+    write( binary );
 } // end call function
-
 
 
 // _return function
 // Pop and restore status
 void Assembler::_return( string s )
 {
-	// Insert OPCODE 10101
-    int num = 21;
-	num = num << 11;
+	// Insert OPCODE
+    int binary = 21; // 10101
+	binary = binary << 11;
 
-    write( num );
+    write( binary );
 } // end _return function
-
 
 
 // read function
@@ -1175,18 +986,15 @@ void Assembler::read( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 10110
-    int num = 22;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 22; // 10110
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end read function
-
 
 
 // write function
@@ -1202,41 +1010,36 @@ void Assembler::write( string s )
     iStream >> OPCODE >> RD;
 
 	// Confirm RD is valid
-    checkRD( RD );
+    validateRD( RD );
 
-	// Insert OPCODE 10111
-    int num = 23;
-    num = num << 11;
+	// Insert OPCODE and RD
+    int binary = 23; // 10111
+    binary = binary << 11;
+    binary += RD << 9;
 
-	// Insert RD
-    num += RD << 9;
-
-    write( num );
+    write( binary );
 } // end write function
-
 
 
 // halt function
 // Halt execution
 void Assembler::halt( string s )
 {
-	// Insert OPCODE 11000
-    int num = 24;
-	num = num << 11;
+	// Insert OPCODE
+    int binary = 24; // 11000
+	binary = binary << 11;
 
-    write( num );
+    write( binary );
 } // end halt function
-
 
 
 // noop function
 // No operation
 void Assembler::noop( string s )
 {
-	// Insert OPCODE 11001
-    int num = 25;
-	num = num << 11;
+	// Insert OPCODE
+    int binary = 25; // 11001
+	binary = binary << 11;
 
-    write( num );
+    write( binary );
 } // end noop function
-

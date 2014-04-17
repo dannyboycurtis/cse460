@@ -63,9 +63,9 @@ void VirtualMachine::run( string fileName )
 	reg[3] = 0;
 
     // set file names for input and output
-    oFileName = fileName.erase( fileName.length() -2, 2 ) + ".o";
-    inFileName = fileName.erase( oFileName.length() -2, 2 ) + ".in";
-    outFileName = fileName.erase( inFileName.length() -3, 2 ) + ".out";
+    oFileName = fileName.erase(fileName.length() -2, 2) + ".o";
+    inFileName = fileName.erase(oFileName.length() -2, 2) + ".in";
+    outFileName = fileName.erase(inFileName.length() -3, 2) + ".out";
     
     // Read file into memory
     fstream oFile;

@@ -1,22 +1,20 @@
 /********************************************************************************
- * James Small & William Elder
- * os.cpp
- * 4/17/13
- * This is the OS program that takes as an argument the filename of the assembly
- * program that needs to be run.  It first passes the filename to the assembler
- * program to create the object code, it then passes the filename to the Virtual
- * Machine program to run the previously created object code.
- ********************************************************************************/
+* Filename: os.cpp
+* Author: Daniel Urbach
+* Date: 4/16/2014
+* Description: This program simulates an operating system by taking a file
+* with assembly instructions, creating the object file and running the code
+********************************************************************************/
 
 #include "Assembler.h"
 #include "VirtualMachine.h"
 
 using namespace std;
 
-int  main(int argc, char * argv[])
+int main( int argc, char * argv[] )
 {
-    Assembler as;
+    Assembler ass;
     VirtualMachine vm;
-    as.assemble(argv[1]);
-    vm.run(argv[1]);
-} 
+    ass.assemble( argv[1] );
+    vm.run( argv[1] );
+} // end main function

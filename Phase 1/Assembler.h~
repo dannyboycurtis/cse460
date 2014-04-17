@@ -72,13 +72,13 @@ private:
     void noop( string s );
         
     //variables
-    string inputFile, outputFile;
+    string inputFileName, outputFileName;
     map<string, FP> instr;
 
 public:
 
     Assembler();
-    void assemble( string fileName );	    
+    void assemble( string filename );	    
 };
 
 #endif

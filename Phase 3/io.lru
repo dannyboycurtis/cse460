@@ -1,0 +1,21 @@
+1
+5
+9
+13
+17
+21
+
+Process Specific Accounting Data
+
+CPU Time = 58 cycles
+Waiting Time = 3289 cycles
+Turnaround Time = 7292 cycles
+IO Time = 486 cycles
+Largest Stack Size = 0
+
+System Specific Accounting Data
+
+System Time = 4066 cycles
+System CPU Utilization = 80.3254%
+User CPU Utilization = 49.8767%
+ThroughPut = 12.3274 processes per second

@@ -92,13 +92,15 @@ void VirtualMachine::run( string fileName )
     oFile.close();
 
 	limit = l;
-
+	cout << "limit: " << limit << endl;
     // execute loop
     while ( execute )
 	{
         ir = mem[pc++];
         binaryCode.i = ir;
         ( this->*instr[binaryCode.f1.OP] )();
+		cout << "pc: " << pc << endl;
+		cout << "reg[0]: " << reg[0] << endl;
     }
 
     // write final clock to .out file   
@@ -243,11 +245,14 @@ void VirtualMachine::resetEqualTo()
 // r[RD] = mem[ADDR]
 void VirtualMachine::load()
 {
-    if ( binaryCode.f2.ADDR >= base + limit || binaryCode.f2.ADDR < base ) {
-        cout << "Address out of range of program\n";
-        exit( 1 );
-    }
-
+	if ( binaryCode.f2.I == 0 )
+	{
+    	if ( binaryCode.f2.ADDR >= base + limit || binaryCode.f2.ADDR < base )
+		{
+        	cout << "Address out of range of program\n";
+        	exit( 1 );
+    	}
+	}
     clock += 4;
     
     if ( binaryCode.f2.I == 0 ) 
@@ -855,7 +860,8 @@ void VirtualMachine::write()
 void VirtualMachine::halt()
 {
     clock += 1;
-    execute = false;
+    //execute = false;
+	exit( 1 );
 } // end halt method
 
 

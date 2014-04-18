@@ -63,9 +63,9 @@ void VirtualMachine::run( string fileName )
 	reg[3] = 0;
 
     // set file names for input and output
-    oFileName = fileName.erase(fileName.length() -2, 2) + ".o";
-    inFileName = fileName.erase(oFileName.length() -2, 2) + ".in";
-    outFileName = fileName.erase(inFileName.length() -3, 2) + ".out";
+    oFileName = fileName.erase( fileName.length() -2, 2 ) + ".o";
+    inFileName = fileName.erase( oFileName.length() -2, 2 ) + ".in";
+    outFileName = fileName.erase( inFileName.length() -3, 2 ) + ".out";
     
     // Read file into memory
     fstream oFile;
@@ -92,13 +92,15 @@ void VirtualMachine::run( string fileName )
     oFile.close();
 
 	limit = l;
-
+	cout << "limit: " << limit << endl;
     // execute loop
     while ( execute )
 	{
         ir = mem[pc++];
         binaryCode.i = ir;
         ( this->*instr[binaryCode.f1.OP] )();
+		cout << "pc: " << pc << endl;
+		cout << "reg[0]: " << reg[0] << endl;
     }
 
     // write final clock to .out file   
@@ -243,11 +245,14 @@ void VirtualMachine::resetEqualTo()
 // r[RD] = mem[ADDR]
 void VirtualMachine::load()
 {
+/*	cout << "bc.f2.ADDR: " << binaryCode.f2.ADDR << endl
+		 << "base: " << base << endl
+		 << "limit: " << limit << endl;
     if ( binaryCode.f2.ADDR >= base + limit || binaryCode.f2.ADDR < base ) {
         cout << "Address out of range of program\n";
         exit( 1 );
     }
-
+*/
     clock += 4;
     
     if ( binaryCode.f2.I == 0 ) 
@@ -855,7 +860,8 @@ void VirtualMachine::write()
 void VirtualMachine::halt()
 {
     clock += 1;
-    execute = false;
+    //execute = false;
+	exit( 1 );
 } // end halt method
 
 

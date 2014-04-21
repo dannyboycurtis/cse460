@@ -92,15 +92,13 @@ void VirtualMachine::run( string fileName )
     oFile.close();
 
 	limit = l;
-	cout << "limit: " << limit << endl;
+
     // execute loop
     while ( execute )
 	{
         ir = mem[pc++];
         binaryCode.i = ir;
         ( this->*instr[binaryCode.f1.OP] )();
-		cout << "pc: " << pc << endl;
-		cout << "reg[0]: " << reg[0] << endl;
     }
 
     // write final clock to .out file   
@@ -245,18 +243,20 @@ void VirtualMachine::resetEqualTo()
 // r[RD] = mem[ADDR]
 void VirtualMachine::load()
 {
+    clock += 4;
+
 	if ( binaryCode.f2.I == 0 )
 	{
     	if ( binaryCode.f2.ADDR >= base + limit || binaryCode.f2.ADDR < base )
 		{
-        	cout << "Address out of range of program\n";
+        	cout << "Address out of range" << endl;
         	exit( 1 );
     	}
+
+		else
+	        reg[binaryCode.f2.RD] = mem[binaryCode.f2.ADDR];
 	}
-    clock += 4;
-    
-    if ( binaryCode.f2.I == 0 ) 
-        reg[binaryCode.f2.RD] = mem[binaryCode.f2.ADDR];
+
     else
         loadi();
 } // end load method
@@ -280,7 +280,7 @@ void VirtualMachine::store()
 {
     if ( binaryCode.f2.ADDR >= base + limit || binaryCode.f2.ADDR < base )
 	{
-        cout << "Address out of range of program\n";
+        cout << "Address out of range" << endl;
         exit( 1 );
     }
  
@@ -299,15 +299,15 @@ void VirtualMachine::add()
     
     if ( binaryCode.f1.I == 0 ) {
         
-        int temp = reg[binaryCode.f1.RD] + reg[binaryCode.f1.RS]; 
+        int sum = reg[binaryCode.f1.RD] + reg[binaryCode.f1.RS]; 
         
-        if ( reg[binaryCode.f1.RD] >= 0 && reg[binaryCode.f1.RS] >= 0 && temp < 0 )
+        if ( reg[binaryCode.f1.RD] >= 0 && reg[binaryCode.f1.RS] >= 0 && sum < 0 )
             setOverflow();
 
-        else if ( reg[binaryCode.f1.RD] < 0 && reg[binaryCode.f1.RS] < 0 && temp >= 0 )
+        else if ( reg[binaryCode.f1.RD] < 0 && reg[binaryCode.f1.RS] < 0 && sum >= 0 )
             setOverflow();
             
-        reg[binaryCode.f1.RD] = temp;
+        reg[binaryCode.f1.RD] = sum;
         setCarryBit(); 
     }
 
@@ -323,15 +323,15 @@ void VirtualMachine::addi()
 {
     clock += 1;
      
-    int temp = reg[binaryCode.f3.RD] + binaryCode.f3.CONST;
+    int sum = reg[binaryCode.f3.RD] + binaryCode.f3.CONST;
         
-    if ( reg[binaryCode.f3.RD] >= 0 && binaryCode.f3.CONST >= 0 && temp < 0 )
+    if ( reg[binaryCode.f3.RD] >= 0 && binaryCode.f3.CONST >= 0 && sum < 0 )
         setOverflow();
 
-    else if ( reg[binaryCode.f3.RD] < 0 && binaryCode.f3.CONST < 0 && temp >= 0 )
+    else if ( reg[binaryCode.f3.RD] < 0 && binaryCode.f3.CONST < 0 && sum >= 0 )
         setOverflow();
             
-    reg[binaryCode.f3.RD] = temp;
+    reg[binaryCode.f3.RD] = sum;
     setCarryBit(); 
 } // end addi method
 
@@ -346,15 +346,15 @@ void VirtualMachine::addc()
     if ( binaryCode.f1.I == 0 )
 	{    
         int carry = getCarryBit();      
-        int temp = reg[binaryCode.f1.RD] + reg[binaryCode.f1.RS] + carry; 
+        int sum = reg[binaryCode.f1.RD] + reg[binaryCode.f1.RS] + carry; 
         
-        if ( reg[binaryCode.f1.RD] >= 0 && reg[binaryCode.f1.RD] >= 0 &&  carry >= 0 && temp < 0 )
+        if ( reg[binaryCode.f1.RD] >= 0 && reg[binaryCode.f1.RD] >= 0 &&  carry >= 0 && sum < 0 )
             setOverflow();
 
-        else if ( reg[binaryCode.f1.RD] < 0 && reg[binaryCode.f1.RD] < 0 && carry < 0 && temp >= 0 )
+        else if ( reg[binaryCode.f1.RD] < 0 && reg[binaryCode.f1.RD] < 0 && carry < 0 && sum >= 0 )
             setOverflow();
             
-        reg[binaryCode.f1.RD] = temp;
+        reg[binaryCode.f1.RD] = sum;
         setCarryBit(); 
     }
 
@@ -371,15 +371,15 @@ void VirtualMachine::addci()
     clock += 1;
     
     int carry = getCarryBit();     
-    int temp = reg[binaryCode.f3.RD] + binaryCode.f3.CONST + carry;
+    int sum = reg[binaryCode.f3.RD] + binaryCode.f3.CONST + carry;
         
-    if ( reg[binaryCode.f3.RD] >= 0 && binaryCode.f3.CONST >= 0 &&  carry >= 0 && temp < 0 )
+    if ( reg[binaryCode.f3.RD] >= 0 && binaryCode.f3.CONST >= 0 &&  carry >= 0 && sum < 0 )
         setOverflow();
 
-    else if ( reg[binaryCode.f3.RD] < 0 && binaryCode.f3.CONST < 0 && carry < 0 && temp >= 0 )
+    else if ( reg[binaryCode.f3.RD] < 0 && binaryCode.f3.CONST < 0 && carry < 0 && sum >= 0 )
         setOverflow();
             
-    reg[binaryCode.f3.RD] = temp;
+    reg[binaryCode.f3.RD] = sum;
     setCarryBit(); 
 } // end addci method
 
